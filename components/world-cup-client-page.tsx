@@ -25,6 +25,7 @@ type WorldCupData = {
 
 export function WorldCupClientPage({ data }: { data: WorldCupData }) {
   const [locale, setLocale] = useState<Locale>(defaultLocale);
+  const [syncedGames, setSyncedGames] = useState(data.games);
   const copy = getDictionary(locale);
 
   useEffect(() => {
@@ -38,9 +39,13 @@ export function WorldCupClientPage({ data }: { data: WorldCupData }) {
     document.title = copy.metadata.title;
   }, [copy.metadata.title, locale]);
 
-  const grouped = useMemo(() => buildGroups(data.groups, data.teams, data.games, data.stadiums, locale), [data, locale]);
-  const bracket = useMemo(() => buildKnockoutRounds(data.games, data.teams, data.stadiums, locale), [data, locale]);
-  const groupGames = useMemo(() => data.games.filter((game) => game.type === "group"), [data.games]);
+  useEffect(() => {
+    setSyncedGames(data.games);
+  }, [data.games]);
+
+  const grouped = useMemo(() => buildGroups(data.groups, data.teams, syncedGames, data.stadiums, locale), [data.groups, data.stadiums, data.teams, syncedGames, locale]);
+  const bracket = useMemo(() => buildKnockoutRounds(syncedGames, data.teams, data.stadiums, locale), [data.stadiums, data.teams, syncedGames, locale]);
+  const groupGames = useMemo(() => syncedGames.filter((game) => game.type === "group"), [syncedGames]);
   const liveCopy = {
     title: copy.live.title,
     syncFallback: copy.live.syncFallback,
@@ -73,12 +78,12 @@ export function WorldCupClientPage({ data }: { data: WorldCupData }) {
               copy={copy}
               title={copy.hero.title}
               status={copy.hero.status}
-              date={dateRangeLabel(data.games, locale)}
+              date={dateRangeLabel(syncedGames, locale)}
               prize={money(896_000_000, locale)}
               teams={data.teams.length}
               location={copy.hero.location}
               stats={[
-                { label: copy.stats.matches, value: data.games.length.toString(), icon: Trophy },
+                { label: copy.stats.matches, value: syncedGames.length.toString(), icon: Trophy },
                 { label: copy.stats.groups, value: data.groups.length.toString(), icon: Globe2 },
                 { label: copy.stats.firstKickOff, value: copy.stats.firstKickOffValue, icon: CalendarDays },
               ]}
@@ -96,11 +101,11 @@ export function WorldCupClientPage({ data }: { data: WorldCupData }) {
             <div id="prizes" className="section-header"><span>{copy.sections.prizes}</span></div>
             <PrizeDistribution locale={locale} copy={copy} />
 
-            <InfoPanels games={data.games} teams={data.teams} stadiums={data.stadiums} locale={locale} copy={copy} />
+            <InfoPanels games={syncedGames} teams={data.teams} stadiums={data.stadiums} locale={locale} copy={copy} />
           </section>
 
           <aside className="space-y-4 xl:sticky xl:top-[66px] xl:self-start">
-            <LiveScoreCarousel initialGames={groupGames.slice(0, 18)} teams={data.teams} stadiums={data.stadiums} locale={locale} copy={liveCopy} />
+            <LiveScoreCarousel initialGames={groupGames} teams={data.teams} stadiums={data.stadiums} locale={locale} copy={liveCopy} onGamesSync={setSyncedGames} />
           </aside>
         </div>
       </div>

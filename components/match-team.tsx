@@ -2,7 +2,7 @@
 
 import type { EnrichedGame } from "@/lib/types";
 import type { Locale } from "@/lib/i18n";
-import { teamFlag, teamMsnUrl, teamName } from "@/lib/transform";
+import { teamBingUrl, teamFlag, teamName } from "@/lib/transform";
 
 export function MatchTeam({ game, side, compact = false, locale = "en" }: { game: EnrichedGame; side: "home" | "away"; compact?: boolean; locale?: Locale }) {
   const flag = teamFlag(game, side);
@@ -15,7 +15,7 @@ export function MatchTeam({ game, side, compact = false, locale = "en" }: { game
       {flag ? <img src={flag} alt="" className="flag-img shrink-0" loading="lazy" /> : <div className="h-[18px] w-[26px] shrink-0 border border-dashed border-[var(--border-strong)] bg-[var(--surface-2)]" />}
       {linkable ? (
         <a
-          href={teamMsnUrl(team?.name_en)}
+          href={teamBingUrl(team?.name_en)}
           className={`${className} hover:text-[var(--accent-2)] hover:underline`}
           target="_blank"
           rel="noreferrer noopener"

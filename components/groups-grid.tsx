@@ -8,7 +8,7 @@ import {
   isLive,
   matchBingUrl,
   scoreLabel,
-  teamMsnUrl,
+  teamBingUrl,
   toInt,
 } from "@/lib/transform";
 import { MatchTeam } from "./match-team";
@@ -60,12 +60,12 @@ function GroupCard({ group, locale, copy }: { group: EnrichedGroup; locale: Loca
                     {standing.team?.flag ? <img src={standing.team.flag} className="flag-img" alt="" loading="lazy" /> : null}
                     {standing.team ? (
                       <a
-                        href={teamMsnUrl(standing.team.name_en)}
+                        href={teamBingUrl(standing.team.name_en)}
                         target="_blank"
                         rel="noreferrer noopener"
                         className="truncate font-bold hover:text-[var(--accent-2)] hover:underline"
                       >
-                            {teamDisplayName(standing.team, locale)}
+                        {teamDisplayName(standing.team, locale)}
                       </a>
                     ) : (
                       <span className="truncate font-bold">{standing.team_id}</span>
@@ -86,7 +86,7 @@ function GroupCard({ group, locale, copy }: { group: EnrichedGroup; locale: Loca
       <div className="border-t border-[var(--border)] bg-[var(--surface)] p-2">
         <div className="grid gap-2 sm:grid-cols-2">
           {group.games.slice(0, 6).map((game) => (
-              <GroupMatch key={game.id} game={game} locale={locale} copy={copy} />
+            <GroupMatch key={game.id} game={game} locale={locale} copy={copy} />
           ))}
         </div>
       </div>
@@ -114,7 +114,7 @@ function GroupMatch({ game, locale, copy }: { game: EnrichedGame; locale: Locale
       <div className="relative z-10 mb-1 flex items-center justify-between text-[10px] uppercase text-[var(--muted)]">
         <span className="flex items-center gap-1.5">
           <a
-              href={matchBingUrl(game, locale)}
+            href={matchBingUrl(game, locale)}
             target="_blank"
             rel="noreferrer noopener"
             className="hover:text-[var(--accent-2)] hover:underline"
@@ -151,10 +151,10 @@ function GroupMatch({ game, locale, copy }: { game: EnrichedGame; locale: Locale
 
 function LiveBadge({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-1 font-bold uppercase text-[var(--accent)]">
+    <span className="inline-flex items-center gap-1 bg-[var(--accent)] px-1.5 py-0.5 font-bold uppercase text-white shadow-sm">
       <span className="relative inline-flex h-2 w-2">
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--accent)] opacity-75" />
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--accent)]" />
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
       </span>
       {label}
     </span>

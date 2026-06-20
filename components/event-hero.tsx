@@ -35,10 +35,11 @@ export function EventHero({ copy, title, status, date, prize, teams, location, s
           <div className="grid grid-cols-3 gap-2 sm:w-72">
             {stats.map((stat) => {
               const Icon = stat.icon;
+              const valueSize = stat.label === copy.stats.firstKickOff ? "text-base sm:text-lg" : "text-xl";
               return (
                 <div key={stat.label} className="border border-white/20 bg-black/18 p-3 text-center backdrop-blur-sm">
                   <Icon className="mx-auto mb-1 text-white/80" size={17} />
-                  <div className="hltv-title text-xl">{stat.value}</div>
+                  <div className={`hltv-title ${valueSize}`}>{stat.value}</div>
                   <div className="text-[10px] uppercase text-white/65">{stat.label}</div>
                 </div>
               );

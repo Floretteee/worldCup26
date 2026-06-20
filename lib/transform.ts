@@ -125,13 +125,13 @@ export function compactNumber(amount: number, locale: Locale = "en") {
   return new Intl.NumberFormat(intlLocale(locale), { notation: "compact", maximumFractionDigits: 1 }).format(amount);
 }
 
-export const MSN_FIFA_HUB = "https://www.msn.com/en-us/sports/soccer-fifa-world-cup";
-
 export function bingSearchUrl(query: string) {
-  return `https://www.bing.com/search?q=${encodeURIComponent(query.trim())}&form=msnsports`;
+  return `https://www.bing.com/search?q=${encodeURIComponent(query.trim())}`;
 }
 
-export function teamMsnUrl(name?: string) {
+export const BING_FIFA_HUB = bingSearchUrl("FIFA World Cup 2026 live scores");
+
+export function teamBingUrl(name?: string) {
   return bingSearchUrl(`${name ?? ""} national football team`);
 }
 

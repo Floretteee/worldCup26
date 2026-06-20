@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, ExternalLink, Radio, RefreshCw } from "lucide-react";
 import type { EnrichedGame, Game, Stadium, Team } from "@/lib/types";
 import type { Locale } from "@/lib/i18n";
 import {
-  MSN_FIFA_HUB,
+  BING_FIFA_HUB,
   enrichGame,
   formatDateTime,
+  gameDate,
   groupBingUrl,
   isLive,
   matchBingUrl,
@@ -24,6 +25,7 @@ type Props = {
   stadiums: Stadium[];
   locale: Locale;
   copy: LiveCarouselCopy;
+  onGamesSync?: (games: Game[]) => void;
 };
 
 export type LiveCarouselCopy = {
@@ -41,30 +43,67 @@ export type LiveCarouselCopy = {
   status: Record<"Finished" | "Live" | "Scheduled", string>;
 };
 
-export function LiveScoreCarousel({ initialGames, teams, stadiums, locale, copy }: Props) {
+export function LiveScoreCarousel({ initialGames, teams, stadiums, locale, copy, onGamesSync }: Props) {
   const [games, setGames] = useState(initialGames);
   const [index, setIndex] = useState(0);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   const [loading, setLoading] = useState(false);
+  const [now, setNow] = useState<Date | null>(null);
+  const [autoRotate, setAutoRotate] = useState(true);
+  const autoRotateRef = useRef(autoRotate);
+  const rotationTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
+    autoRotateRef.current = autoRotate;
+  }, [autoRotate]);
+
+  useEffect(() => {
+    setNow(new Date());
+    const clock = window.setInterval(() => setNow(new Date()), 60000);
+    return () => window.clearInterval(clock);
+  }, []);
+
+  const orderedGames = useMemo(() => orderScoreboardGames(games, now), [games, now]);
+
+  useEffect(() => {
+    if (rotationTimerRef.current !== null) {
+      window.clearInterval(rotationTimerRef.current);
+      rotationTimerRef.current = null;
+    }
+    if (!autoRotate || orderedGames.length <= 1) return;
     const tick = window.setInterval(() => {
-      setIndex((current) => (games.length ? (current + 1) % games.length : 0));
+      setIndex((current) => (orderedGames.length ? (current + 1) % orderedGames.length : 0));
     }, 5000);
-    return () => window.clearInterval(tick);
-  }, [games.length]);
+    rotationTimerRef.current = tick;
+    return () => {
+      window.clearInterval(tick);
+      if (rotationTimerRef.current === tick) rotationTimerRef.current = null;
+    };
+  }, [autoRotate, orderedGames.length]);
+
+  useEffect(() => {
+    setIndex((current) => (orderedGames.length && current < orderedGames.length ? current : 0));
+  }, [orderedGames.length]);
 
   useEffect(() => {
     const refresh = async () => {
       setLoading(true);
       try {
-        const response = await fetch("https://worldcup26.ir/get/games", { cache: "no-store" });
+        const response = await fetch("/api/games", { cache: "no-store" });
+        if (!response.ok) throw new Error(`Live games request failed: ${response.status}`);
         const data = (await response.json()) as { games: Game[] };
-        const groupGames = data.games.filter((game) => game.type === "group").slice(0, 24);
+        const refreshedGames = data.games;
+        const groupGames = refreshedGames.filter((game) => game.type === "group");
         setGames(groupGames);
-        setUpdatedAt(new Date());
+        onGamesSync?.(refreshedGames);
+        const syncedAt = new Date();
+        setNow(syncedAt);
+        setUpdatedAt(syncedAt);
+        if (autoRotateRef.current) setIndex(0);
       } catch {
-        setUpdatedAt(new Date());
+        const syncedAt = new Date();
+        setNow(syncedAt);
+        setUpdatedAt(syncedAt);
       } finally {
         setLoading(false);
       }
@@ -72,12 +111,32 @@ export function LiveScoreCarousel({ initialGames, teams, stadiums, locale, copy 
     refresh();
     const interval = window.setInterval(refresh, 30000);
     return () => window.clearInterval(interval);
-  }, []);
+  }, [onGamesSync]);
 
   const enriched = useMemo(
-    () => games.map((game) => enrichGame(game, teams, stadiums)).sort((a, b) => Number(a.id) - Number(b.id)),
-    [games, teams, stadiums],
+    () => orderedGames.map((game) => enrichGame(game, teams, stadiums)),
+    [orderedGames, teams, stadiums],
   );
+
+  const pauseRotation = () => {
+    if (rotationTimerRef.current !== null) {
+      window.clearInterval(rotationTimerRef.current);
+      rotationTimerRef.current = null;
+    }
+    setAutoRotate(false);
+  };
+  const previousScore = () => {
+    pauseRotation();
+    setIndex((value) => (value - 1 + enriched.length) % enriched.length);
+  };
+  const nextScore = () => {
+    pauseRotation();
+    setIndex((value) => (value + 1) % enriched.length);
+  };
+  const selectScore = (gameId: string) => {
+    pauseRotation();
+    setIndex(enriched.findIndex((item) => item.id === gameId));
+  };
 
   const safeIndex = enriched.length ? index % enriched.length : 0;
   const active = enriched[safeIndex];
@@ -86,7 +145,7 @@ export function LiveScoreCarousel({ initialGames, teams, stadiums, locale, copy 
   return (
     <section id="live" className="standard-box overflow-hidden">
       <a
-        href={MSN_FIFA_HUB}
+        href={BING_FIFA_HUB}
         target="_blank"
         rel="noreferrer noopener"
         className="group flex items-center justify-between bg-[var(--nav)] px-3 py-2 text-white transition hover:bg-[#1c2c43]"
@@ -110,13 +169,13 @@ export function LiveScoreCarousel({ initialGames, teams, stadiums, locale, copy 
         <div className="p-3">
           <ScoreCard game={active} locale={locale} copy={copy} />
           <div className="mt-3 flex items-center justify-between gap-2">
-            <button type="button" onClick={() => setIndex((value) => (value - 1 + enriched.length) % enriched.length)} className="grid min-h-10 min-w-10 place-items-center border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)]" aria-label={copy.previous}>
+            <button type="button" onClick={previousScore} className="grid min-h-10 min-w-10 place-items-center border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)]" aria-label={copy.previous}>
               <ChevronLeft size={18} />
             </button>
             <div className="text-center text-[11px] uppercase text-[var(--muted)]">
               {matchOf(safeIndex + 1, enriched.length, locale)}
             </div>
-            <button type="button" onClick={() => setIndex((value) => (value + 1) % enriched.length)} className="grid min-h-10 min-w-10 place-items-center border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)]" aria-label={copy.next}>
+            <button type="button" onClick={nextScore} className="grid min-h-10 min-w-10 place-items-center border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)]" aria-label={copy.next}>
               <ChevronRight size={18} />
             </button>
           </div>
@@ -128,7 +187,7 @@ export function LiveScoreCarousel({ initialGames, teams, stadiums, locale, copy 
                 <div key={game.id} className="relative flex items-stretch border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)]">
                   <button
                     type="button"
-                    onClick={() => setIndex(enriched.findIndex((item) => item.id === game.id))}
+                    onClick={() => selectScore(game.id)}
                     className="flex-1 p-2 text-left"
                     aria-label={showMatch(teamName(game, "home", locale), teamName(game, "away", locale), locale)}
                   >
@@ -158,6 +217,50 @@ export function LiveScoreCarousel({ initialGames, teams, stadiums, locale, copy 
   );
 }
 
+function orderScoreboardGames(games: Game[], now: Date | null) {
+  if (!now) return [...games].sort(compareByDateAsc);
+
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+
+  const liveGames: Game[] = [];
+  const todayFinished: Game[] = [];
+  const upcoming: Game[] = [];
+  const recentFinished: Game[] = [];
+  const staleUnplayed: Game[] = [];
+
+  for (const game of games) {
+    const date = gameDate(game);
+    const timestamp = date.getTime();
+    if (isLive(game)) {
+      liveGames.push(game);
+    } else if (game.finished === "TRUE" || game.time_elapsed === "finished") {
+      if (timestamp >= todayStart.getTime()) todayFinished.push(game);
+      else recentFinished.push(game);
+    } else if (timestamp >= now.getTime()) {
+      upcoming.push(game);
+    } else {
+      staleUnplayed.push(game);
+    }
+  }
+
+  return [
+    ...liveGames.sort(compareByDateAsc),
+    ...todayFinished.sort(compareByDateDesc),
+    ...upcoming.sort(compareByDateAsc),
+    ...recentFinished.sort(compareByDateDesc),
+    ...staleUnplayed.sort(compareByDateDesc),
+  ];
+}
+
+function compareByDateAsc(a: Game, b: Game) {
+  return gameDate(a).getTime() - gameDate(b).getTime() || Number(a.id) - Number(b.id);
+}
+
+function compareByDateDesc(a: Game, b: Game) {
+  return gameDate(b).getTime() - gameDate(a).getTime() || Number(a.id) - Number(b.id);
+}
+
 function ScoreCard({ game, locale, copy }: { game: EnrichedGame; locale: Locale; copy: LiveCarouselCopy }) {
   const status = matchStatus(game);
   const live = isLive(game);
@@ -173,7 +276,7 @@ function ScoreCard({ game, locale, copy }: { game: EnrichedGame; locale: Locale;
         >
           {groupMatch(game.group, game.id, locale)}
         </a>
-        <span className={`inline-flex items-center gap-1 font-bold ${live ? "text-[var(--accent)]" : status === "Finished" ? "text-[var(--accent-2)]" : ""}`}>
+        <span className={`inline-flex items-center gap-1 font-bold ${live ? "bg-[var(--accent)] px-1.5 py-0.5 text-white shadow-sm" : status === "Finished" ? "text-[var(--accent-2)]" : ""}`}>
           <Radio size={12} /> {copy.status[status]}
         </span>
       </div>
