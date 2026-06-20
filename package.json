@@ -1,0 +1,36 @@
+{
+  "name": "worldcup",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "preview": "wrangler pages dev out",
+    "deploy": "next build && wrangler pages deploy out --project-name worldcup-hltv",
+    "cf-build": "next build",
+    "lint": "next lint"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.21.0",
+    "next": "^16.2.9",
+    "next-themes": "^0.4.6",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "^1.19.11",
+    "@tailwindcss/postcss": "^4.3.1",
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "postcss": "^8.5.15",
+    "tailwindcss": "^4.3.1",
+    "typescript": "^6.0.3",
+    "wrangler": "^4.86.0"
+  }
+}
