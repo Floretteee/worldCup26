@@ -1,6 +1,5 @@
-export async function onRequestGet() {
+export async function GET() {
   const response = await fetch("https://worldcup26.ir/get/games", {
-    cf: { cacheTtl: 0, cacheEverything: false },
     headers: { accept: "application/json" },
   });
 
