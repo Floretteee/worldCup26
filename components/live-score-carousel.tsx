@@ -8,7 +8,6 @@ import {
   BING_FIFA_HUB,
   enrichGame,
   formatDateTime,
-  gameDate,
   groupBingUrl,
   isLive,
   matchBingUrl,
@@ -17,6 +16,7 @@ import {
   stadiumBingUrl,
   teamName,
 } from "@/lib/transform";
+import { displayTimezone } from "@/lib/timezone";
 import { MatchTeam } from "./match-team";
 
 type Props = {
@@ -63,7 +63,8 @@ export function LiveScoreCarousel({ initialGames, teams, stadiums, locale, copy,
     return () => window.clearInterval(clock);
   }, []);
 
-  const orderedGames = useMemo(() => orderScoreboardGames(games, now), [games, now]);
+  const enrichedAll = useMemo(() => games.map((game) => enrichGame(game, teams, stadiums)), [games, teams, stadiums]);
+  const orderedGames = useMemo(() => orderScoreboardGames(enrichedAll, now), [enrichedAll, now]);
 
   useEffect(() => {
     if (rotationTimerRef.current !== null) {
@@ -113,10 +114,7 @@ export function LiveScoreCarousel({ initialGames, teams, stadiums, locale, copy,
     return () => window.clearInterval(interval);
   }, [onGamesSync]);
 
-  const enriched = useMemo(
-    () => orderedGames.map((game) => enrichGame(game, teams, stadiums)),
-    [orderedGames, teams, stadiums],
-  );
+  const enriched = orderedGames;
 
   const pauseRotation = () => {
     if (rotationTimerRef.current !== null) {
@@ -161,7 +159,7 @@ export function LiveScoreCarousel({ initialGames, teams, stadiums, locale, copy,
         </div>
         <div className="flex items-center gap-1 text-[10px] font-bold uppercase text-white/85">
           <RefreshCw className={loading ? "animate-spin" : ""} size={13} />
-          {updatedAt ? updatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : copy.syncFallback}
+          {updatedAt ? updatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", timeZone: displayTimezone() }) : copy.syncFallback}
         </div>
       </a>
 
@@ -217,20 +215,19 @@ export function LiveScoreCarousel({ initialGames, teams, stadiums, locale, copy,
   );
 }
 
-function orderScoreboardGames(games: Game[], now: Date | null) {
+function orderScoreboardGames(games: EnrichedGame[], now: Date | null) {
   if (!now) return [...games].sort(compareByDateAsc);
 
   const recentCutoff = now.getTime() - 3 * 60 * 60 * 1000;
   const upcomingCutoff = now.getTime() + 24 * 60 * 60 * 1000;
 
-  const liveGames: Game[] = [];
-  const recentFinished: Game[] = [];
-  const recentlyDue: Game[] = [];
-  const upcoming: Game[] = [];
+  const liveGames: EnrichedGame[] = [];
+  const recentFinished: EnrichedGame[] = [];
+  const recentlyDue: EnrichedGame[] = [];
+  const upcoming: EnrichedGame[] = [];
 
   for (const game of games) {
-    const date = gameDate(game);
-    const timestamp = date.getTime();
+    const timestamp = game.dateObject.getTime();
     if (isLive(game)) {
       liveGames.push(game);
     } else if (timestamp < recentCutoff || timestamp > upcomingCutoff) {
@@ -252,12 +249,12 @@ function orderScoreboardGames(games: Game[], now: Date | null) {
   ];
 }
 
-function compareByDateAsc(a: Game, b: Game) {
-  return gameDate(a).getTime() - gameDate(b).getTime() || Number(a.id) - Number(b.id);
+function compareByDateAsc(a: EnrichedGame, b: EnrichedGame) {
+  return a.dateObject.getTime() - b.dateObject.getTime() || Number(a.id) - Number(b.id);
 }
 
-function compareByDateDesc(a: Game, b: Game) {
-  return gameDate(b).getTime() - gameDate(a).getTime() || Number(a.id) - Number(b.id);
+function compareByDateDesc(a: EnrichedGame, b: EnrichedGame) {
+  return b.dateObject.getTime() - a.dateObject.getTime() || Number(a.id) - Number(b.id);
 }
 
 function ScoreCard({ game, locale, copy }: { game: EnrichedGame; locale: Locale; copy: LiveCarouselCopy }) {

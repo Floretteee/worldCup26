@@ -28,7 +28,7 @@ export function InfoPanels({ games, teams, stadiums, locale, copy }: { games: Ga
         <div className="standard-box border-t-0">
           <table className="w-full text-sm">
             <tbody>
-              <Row label={copy.info.date} value={dateRangeLabel(games, locale)} search="FIFA World Cup 2026 schedule" />
+              <Row label={copy.info.date} value={dateRangeLabel(games, locale, stadiums)} search="FIFA World Cup 2026 schedule" />
               <Row label={copy.info.teams} value={String(teams.length)} search="FIFA World Cup 2026 teams list" />
               <Row label={copy.info.matches} value={String(games.length)} search="FIFA World Cup 2026 fixtures" />
               <Row label={copy.info.prizePool} value={money(896_000_000, locale)} search="FIFA World Cup 2026 prize money" />

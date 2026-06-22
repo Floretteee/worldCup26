@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Game, Group, Stadium, Team } from "@/lib/types";
 import { defaultLocale, getDictionary, intlLocale, type Locale } from "@/lib/i18n";
 import { buildGroups, buildKnockoutRounds, dateRangeLabel, money } from "@/lib/transform";
+import { getBrowserTimezone, setDisplayTimezone } from "@/lib/timezone";
 import { Navbar } from "@/components/navbar";
 import { EventHero } from "@/components/event-hero";
 import { KnockoutBracket } from "@/components/knockout-bracket";
@@ -26,7 +27,13 @@ type WorldCupData = {
 export function WorldCupClientPage({ data }: { data: WorldCupData }) {
   const [locale, setLocale] = useState<Locale>(defaultLocale);
   const [syncedGames, setSyncedGames] = useState(data.games);
+  const [, setTzReady] = useState(false);
   const copy = getDictionary(locale);
+
+  useEffect(() => {
+    setDisplayTimezone(getBrowserTimezone());
+    setTzReady(true);
+  }, []);
 
   useEffect(() => {
     const stored = window.localStorage.getItem(localeStorageKey);
@@ -78,7 +85,7 @@ export function WorldCupClientPage({ data }: { data: WorldCupData }) {
               copy={copy}
               title={copy.hero.title}
               status={copy.hero.status}
-              date={dateRangeLabel(syncedGames, locale)}
+              date={dateRangeLabel(syncedGames, locale, data.stadiums)}
               prize={money(896_000_000, locale)}
               teams={data.teams.length}
               location={copy.hero.location}

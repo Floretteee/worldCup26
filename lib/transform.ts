@@ -1,5 +1,6 @@
 import type { BracketRound, EnrichedGame, EnrichedGroup, Game, Group, Stadium, Team } from "./types";
 import { getDictionary, intlLocale, teamDisplayName, type Locale } from "./i18n";
+import { displayTimezone, parseInTimezone, stadiumTimezone } from "./timezone";
 
 const groupOrder = "ABCDEFGHIJKL".split("");
 
@@ -8,19 +9,20 @@ export function toInt(value?: string | number | null) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-export function gameDate(game: Game) {
+export function gameDate(game: Game, stadium?: Stadium) {
   const [date = "", time = "00:00"] = (game.local_date || "").split(" ");
   const [month, day, year] = date.split("/").map((part) => Number.parseInt(part, 10));
   const [hour, minute] = time.split(":").map((part) => Number.parseInt(part, 10));
   if (!month || !day || !year) return new Date(0);
-  return new Date(year, month - 1, day, hour || 0, minute || 0);
+  const timeZone = stadiumTimezone(stadium, game.stadium_id);
+  return parseInTimezone(year, month - 1, day, hour || 0, minute || 0, timeZone);
 }
 
 export function enrichGame(game: Game, teams: Team[], stadiums: Stadium[]): EnrichedGame {
   const homeTeam = teams.find((team) => team.id === game.home_team_id);
   const awayTeam = teams.find((team) => team.id === game.away_team_id);
   const stadium = stadiums.find((item) => item.id === game.stadium_id);
-  return { ...game, homeTeam, awayTeam, stadium, dateObject: gameDate(game) };
+  return { ...game, homeTeam, awayTeam, stadium, dateObject: gameDate(game, stadium) };
 }
 
 export function buildGroups(groups: Group[], teams: Team[], games: Game[], stadiums: Stadium[], locale: Locale = "en"): EnrichedGroup[] {
@@ -67,7 +69,7 @@ export function buildKnockoutRounds(games: Game[], teams: Team[], stadiums: Stad
   }));
 }
 
-export function formatDateTime(date: Date, locale: Locale = "en") {
+export function formatDateTime(date: Date, locale: Locale = "en", timeZone: string = displayTimezone()) {
   if (date.getTime() === 0) return getDictionary(locale).common.tbd;
   return new Intl.DateTimeFormat(intlLocale(locale), {
     month: "short",
@@ -75,16 +77,21 @@ export function formatDateTime(date: Date, locale: Locale = "en") {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
+    hourCycle: "h23",
+    timeZone,
   }).format(date);
 }
 
-export function shortDate(date: Date, locale: Locale = "en") {
+export function shortDate(date: Date, locale: Locale = "en", timeZone: string = displayTimezone()) {
   if (date.getTime() === 0) return getDictionary(locale).common.tbd;
-  return new Intl.DateTimeFormat(intlLocale(locale), { month: "short", day: "numeric" }).format(date);
+  return new Intl.DateTimeFormat(intlLocale(locale), { month: "short", day: "numeric", timeZone }).format(date);
 }
 
-export function dateRangeLabel(games: Game[], locale: Locale = "en") {
-  const dates = games.map(gameDate).filter((date) => date.getTime() > 0).sort((a, b) => a.getTime() - b.getTime());
+export function dateRangeLabel(games: Game[], locale: Locale = "en", stadiums: Stadium[] = []) {
+  const dates = games
+    .map((game) => gameDate(game, stadiums.find((item) => item.id === game.stadium_id)))
+    .filter((date) => date.getTime() > 0)
+    .sort((a, b) => a.getTime() - b.getTime());
   if (!dates.length) return locale === "zh" ? "2026年6月11日 - 7月19日" : "Jun 11 - Jul 19, 2026";
   const first = dates[0];
   const last = dates[dates.length - 1];
