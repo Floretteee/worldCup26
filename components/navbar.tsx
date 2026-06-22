@@ -1,6 +1,5 @@
 import { Menu } from "lucide-react";
 import type { Dictionary, Locale } from "@/lib/i18n";
-import { ThemeToggle } from "./theme-toggle";
 
 export function Navbar({ locale, copy, onLocaleChange }: { locale: Locale; copy: Dictionary; onLocaleChange: (locale: Locale) => void }) {
   const nextLocale = locale === "zh" ? "en" : "zh";
@@ -34,7 +33,6 @@ export function Navbar({ locale, copy, onLocaleChange }: { locale: Locale; copy:
           <button type="button" onClick={() => onLocaleChange(nextLocale)} className="min-h-9 border border-white/25 px-3 py-2 text-[11px] font-bold uppercase text-white/90 hover:bg-white/10">
             {copy.nav.language}
           </button>
-          <ThemeToggle labels={copy.theme} />
         </div>
         <div className="ml-auto flex items-center gap-1 lg:hidden">
           <button type="button" onClick={() => onLocaleChange(nextLocale)} className="grid min-h-10 place-items-center px-2 text-xs font-bold uppercase hover:bg-white/10">

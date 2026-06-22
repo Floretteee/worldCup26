@@ -50,11 +50,6 @@ export const dictionaries = {
       openMenu: "打开菜单",
       language: "English",
     },
-    theme: {
-      light: "日间",
-      dark: "夜间",
-      system: "自动",
-    },
     hero: {
       masthead: "2026 世界杯赛事中心",
       hosts: "美国 | 墨西哥 | 加拿大",
@@ -184,11 +179,6 @@ export const dictionaries = {
       settings: "Settings",
       openMenu: "Open menu",
       language: "中文",
-    },
-    theme: {
-      light: "Day",
-      dark: "Night",
-      system: "Auto",
     },
     hero: {
       masthead: "World Cup 2026 Match Center",

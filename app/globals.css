@@ -3,26 +3,6 @@
 :root {
   --font-open-sans: "Open Sans", "Segoe UI", Tahoma, sans-serif;
   --font-oswald: "Oswald", "Arial Narrow", "Franklin Gothic Medium", Impact, sans-serif;
-  --page: #d6dee8;
-  --page-pattern: rgba(21, 51, 88, 0.1);
-  --surface: #f7f9fc;
-  --surface-2: #e7edf4;
-  --surface-3: #ffffff;
-  --border: #b8c4d2;
-  --border-strong: #8395aa;
-  --text: #172334;
-  --muted: #405267;
-  --faint: #65768a;
-  --nav: #3d5169;
-  --nav-text: #eef5ff;
-  --accent: #c81f32;
-  --accent-2: #2d6ca8;
-  --green: #14804a;
-  --yellow: #b78300;
-  --shadow: 0 1px 0 rgba(255, 255, 255, 0.8), 0 12px 30px rgba(40, 65, 90, 0.15);
-}
-
-[data-theme="dark"] {
   --page: #0b1118;
   --page-pattern: rgba(78, 130, 190, 0.12);
   --surface: #161c23;
@@ -126,12 +106,8 @@ button { font: inherit; }
   color: var(--text);
   background: var(--surface-3);
   border: 1px solid var(--border-strong);
-  box-shadow: 0 1px 0 rgba(255,255,255,.7), 0 7px 16px rgba(21, 39, 58, .13);
-  transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
-}
-
-[data-theme="dark"] .hltv-bracket-match {
   box-shadow: 0 1px 0 rgba(255,255,255,.04), 0 8px 18px rgba(0,0,0,.26);
+  transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease;
 }
 
 .hltv-bracket-match:hover {
@@ -248,16 +224,10 @@ button { font: inherit; }
   position: relative;
   background:
     linear-gradient(var(--surface-3), var(--surface-3)) padding-box,
-    linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 35%, transparent) 55%, var(--accent)) border-box;
+    linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 22%, transparent) 55%, var(--accent)) border-box;
   border: 2px solid transparent;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent), 0 6px 18px color-mix(in srgb, var(--accent) 28%, transparent);
   animation: live-glow 2.4s ease-in-out infinite;
-}
-
-[data-theme="dark"] .live-match-card {
-  background:
-    linear-gradient(var(--surface-3), var(--surface-3)) padding-box,
-    linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 22%, transparent) 55%, var(--accent)) border-box;
 }
 
 @keyframes live-glow {
