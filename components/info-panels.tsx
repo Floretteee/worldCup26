@@ -62,7 +62,7 @@ export function InfoPanels({ games, teams, stadiums, locale, copy }: { games: Ga
             >
               <div className="truncate text-sm font-bold">{stadium.fifa_name || stadium.name_en}</div>
               <div className="mt-1 text-xs text-[var(--muted)]">{stadium.city_en}</div>
-              <div className="mt-2 inline-flex bg-[var(--surface-2)] px-2 py-1 text-[10px] font-bold uppercase text-[var(--muted)]">
+              <div className="mt-2 inline-flex bg-[var(--nav)] px-2 py-1 text-[10px] font-bold uppercase text-white/85">
                  {compactNumber(stadium.capacity, locale)} {copy.info.seats}
               </div>
             </a>
@@ -76,7 +76,7 @@ export function InfoPanels({ games, teams, stadiums, locale, copy }: { games: Ga
 function Row({ label, value, search }: { label: string; value: string; search?: string }) {
   return (
     <tr className="border-b border-[var(--border)] last:border-b-0">
-      <th className="w-36 bg-[var(--surface-2)] px-3 py-3 text-left text-xs uppercase text-[var(--muted)]">{label}</th>
+      <th className="w-36 bg-[var(--nav)] px-3 py-3 text-left text-xs uppercase text-white/85">{label}</th>
       <td className="px-3 py-3 font-bold">
         {search ? (
           <a

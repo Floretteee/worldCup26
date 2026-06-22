@@ -47,7 +47,7 @@ export function BracketScroller({ children, defaultCollapsed, labels }: Props) {
 
   return (
     <div className="standard-box overflow-hidden border-t-0">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-xs text-[var(--muted)]">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--nav)] px-3 py-2 text-xs text-white/85">
         <div className="flex items-center gap-2">
           <span className="font-bold uppercase">{labels.playoffs}</span>
           <span className="hidden sm:inline">{labels.hint}</span>

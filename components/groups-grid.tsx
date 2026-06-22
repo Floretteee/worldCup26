@@ -32,15 +32,15 @@ function GroupCard({ group, locale, copy }: { group: EnrichedGroup; locale: Loca
         href={groupBingUrl(group.name)}
         target="_blank"
         rel="noreferrer noopener"
-        className="flex items-center justify-between bg-[var(--nav)] px-3 py-2 text-white transition hover:bg-[#1c2c43]"
+        className="flex items-center justify-between bg-[var(--nav)] px-3 py-2 text-white transition hover:brightness-125"
         aria-label={`${copy.standings.group} ${group.name}`}
       >
         <h3 className="hltv-title text-lg">{copy.round.group(group.name)}</h3>
-        <span className="text-[11px] uppercase text-white/65">{group.games.length} {copy.standings.matches}</span>
+        <span className="text-[11px] font-bold uppercase text-white/85">{group.games.length} {copy.standings.matches}</span>
       </a>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[430px] text-left text-xs">
-          <thead className="bg-[var(--surface-2)] text-[10px] uppercase text-[var(--muted)]">
+          <thead className="bg-[var(--nav)] text-[10px] uppercase text-white/85">
             <tr>
               <th className="px-2 py-2">{copy.standings.team}</th>
               <th className="px-1 py-2 text-center">{copy.standings.mp}</th>
@@ -138,7 +138,7 @@ function GroupMatch({ game, locale, copy }: { game: EnrichedGame; locale: Locale
           href={matchBingUrl(game, locale)}
           target="_blank"
           rel="noreferrer noopener"
-          className={`hltv-title px-2 py-1 text-center text-xs ${live ? "bg-[var(--accent)] text-white" : "bg-[var(--surface-2)] hover:opacity-80"}`}
+          className={`hltv-title px-3 py-2 text-center text-xl ${live ? "bg-[var(--accent)] text-white hover:opacity-90" : "bg-[var(--nav)] text-white hover:opacity-80"}`}
           aria-label={copy.common.searchScore(score)}
         >
           {score}

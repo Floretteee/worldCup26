@@ -148,7 +148,7 @@ export function LiveScoreCarousel({ initialGames, teams, stadiums, locale, copy,
         href={BING_FIFA_HUB}
         target="_blank"
         rel="noreferrer noopener"
-        className="group flex items-center justify-between bg-[var(--nav)] px-3 py-2 text-white transition hover:bg-[#1c2c43]"
+        className="group flex items-center justify-between bg-[var(--nav)] px-3 py-2 text-white transition hover:brightness-125"
         aria-label={copy.openHub}
       >
         <div className="flex items-center gap-2">
@@ -157,9 +157,9 @@ export function LiveScoreCarousel({ initialGames, teams, stadiums, locale, copy,
             <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500" />
           </span>
           <h2 className="hltv-title text-base uppercase">{copy.title}</h2>
-          <ExternalLink size={13} className="text-white/55 transition group-hover:text-white" />
+          <ExternalLink size={13} className="text-white/80 transition group-hover:text-white" />
         </div>
-        <div className="flex items-center gap-1 text-[10px] uppercase text-white/70">
+        <div className="flex items-center gap-1 text-[10px] font-bold uppercase text-white/85">
           <RefreshCw className={loading ? "animate-spin" : ""} size={13} />
           {updatedAt ? updatedAt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : copy.syncFallback}
         </div>
@@ -220,36 +220,35 @@ export function LiveScoreCarousel({ initialGames, teams, stadiums, locale, copy,
 function orderScoreboardGames(games: Game[], now: Date | null) {
   if (!now) return [...games].sort(compareByDateAsc);
 
-  const todayStart = new Date(now);
-  todayStart.setHours(0, 0, 0, 0);
+  const recentCutoff = now.getTime() - 3 * 60 * 60 * 1000;
+  const upcomingCutoff = now.getTime() + 24 * 60 * 60 * 1000;
 
   const liveGames: Game[] = [];
-  const todayFinished: Game[] = [];
-  const upcoming: Game[] = [];
   const recentFinished: Game[] = [];
-  const staleUnplayed: Game[] = [];
+  const recentlyDue: Game[] = [];
+  const upcoming: Game[] = [];
 
   for (const game of games) {
     const date = gameDate(game);
     const timestamp = date.getTime();
     if (isLive(game)) {
       liveGames.push(game);
+    } else if (timestamp < recentCutoff || timestamp > upcomingCutoff) {
+      continue;
     } else if (game.finished === "TRUE" || game.time_elapsed === "finished") {
-      if (timestamp >= todayStart.getTime()) todayFinished.push(game);
-      else recentFinished.push(game);
+      recentFinished.push(game);
     } else if (timestamp >= now.getTime()) {
       upcoming.push(game);
     } else {
-      staleUnplayed.push(game);
+      recentlyDue.push(game);
     }
   }
 
   return [
     ...liveGames.sort(compareByDateAsc),
-    ...todayFinished.sort(compareByDateDesc),
-    ...upcoming.sort(compareByDateAsc),
     ...recentFinished.sort(compareByDateDesc),
-    ...staleUnplayed.sort(compareByDateDesc),
+    ...recentlyDue.sort(compareByDateDesc),
+    ...upcoming.sort(compareByDateAsc),
   ];
 }
 
@@ -267,7 +266,7 @@ function ScoreCard({ game, locale, copy }: { game: EnrichedGame; locale: Locale;
   const score = scoreLabel(game, locale);
   return (
     <article className={`overflow-hidden ${live ? "live-match-card" : "border border-[var(--border)] bg-[var(--surface-3)]"}`}>
-      <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-[11px] uppercase text-[var(--muted)]">
+      <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--nav)] px-3 py-2 text-[11px] uppercase text-white/85">
         <a
           href={groupBingUrl(game.group)}
           target="_blank"

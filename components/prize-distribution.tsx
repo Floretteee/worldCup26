@@ -21,7 +21,7 @@ export function PrizeDistribution({ locale, copy }: { locale: Locale; copy: Dict
           </a>
         ))}
       </div>
-      <div className="mt-3 flex items-center justify-between gap-3 border border-dashed border-[var(--border-strong)] bg-[var(--surface-2)] p-3 text-xs text-[var(--muted)]">
+      <div className="mt-3 flex items-center justify-between gap-3 border border-dashed border-[var(--border-strong)] bg-[var(--nav)] p-3 text-xs text-white/80">
         <span>{copy.prizes.note}</span>
         <a
           href={prizeBingUrl()}

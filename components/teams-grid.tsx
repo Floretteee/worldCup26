@@ -17,7 +17,7 @@ export function TeamsGrid({ teams, locale, copy }: { teams: Team[]; locale: Loca
             className="group relative overflow-hidden border border-[var(--border)] bg-[var(--surface-3)] p-3 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-[var(--accent-2)]"
             aria-label={copy.common.openTeam(teamDisplayName(team, locale))}
           >
-            <div className="absolute right-2 top-2 bg-[var(--surface-2)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--muted)]">{team.groups}</div>
+            <div className="absolute right-2 top-2 bg-[var(--nav)] px-1.5 py-0.5 text-[10px] font-bold text-white/85">{team.groups}</div>
             <div className="mx-auto mb-3 grid h-16 w-20 place-items-center bg-[var(--surface-2)] p-2">
               <img src={team.flag} alt="" className="max-h-10 w-14 object-cover shadow" loading="lazy" />
             </div>

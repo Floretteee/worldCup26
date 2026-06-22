@@ -22,7 +22,7 @@ export function Navbar({ locale, copy, onLocaleChange }: { locale: Locale; copy:
           WC26TV
         </a>
         <nav className="thin-scrollbar hidden min-w-0 flex-1 items-center overflow-x-auto md:flex" aria-label={copy.nav.aria}>
-          <span className="hltv-title mr-2 shrink-0 px-2 text-xs uppercase text-white/55">{copy.nav.sections}</span>
+          <span className="hltv-title mr-2 shrink-0 px-2 text-xs uppercase text-white/80">{copy.nav.sections}</span>
           {links.map(([label, href]) => (
             <a key={href} href={href} className="shrink-0 px-3 py-4 text-[13px] font-bold hover:bg-white/10">
               {label}
@@ -30,8 +30,8 @@ export function Navbar({ locale, copy, onLocaleChange }: { locale: Locale; copy:
           ))}
         </nav>
         <div className="ml-auto hidden shrink-0 items-center gap-2 lg:flex">
-          <span className="hltv-title text-xs uppercase text-white/55">{copy.nav.settings}</span>
-          <button type="button" onClick={() => onLocaleChange(nextLocale)} className="min-h-9 border border-white/15 px-3 py-2 text-[11px] font-bold uppercase text-white/80 hover:bg-white/10">
+          <span className="hltv-title text-xs uppercase text-white/80">{copy.nav.settings}</span>
+          <button type="button" onClick={() => onLocaleChange(nextLocale)} className="min-h-9 border border-white/25 px-3 py-2 text-[11px] font-bold uppercase text-white/90 hover:bg-white/10">
             {copy.nav.language}
           </button>
           <ThemeToggle labels={copy.theme} />
